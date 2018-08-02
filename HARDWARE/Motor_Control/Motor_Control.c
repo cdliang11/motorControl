@@ -157,7 +157,6 @@ void Data_Convert(u8 Motor_ID){
 	M3508[Motor_ID].Angle = (int16_t)((M3508[Motor_ID].Original_Data[0] << 8) + M3508[Motor_ID].Original_Data[1]);
 	M3508[Motor_ID].Speed = (int16_t)((M3508[Motor_ID].Original_Data[2] << 8) + M3508[Motor_ID].Original_Data[3]);
 	M3508[Motor_ID].Moment = (int16_t)((M3508[Motor_ID].Original_Data[4] << 8) + M3508[Motor_ID].Original_Data[5]);
-	//printf("Speed %d: %d\r\n",Motor_ID,M3508[Motor_ID].Speed);//一定不要在这加printf输出
 }
 
 /*

@@ -96,6 +96,37 @@ void CAN1_Init(u8 tsjw, u8 tbs2, u8 tbs1, u16 brp)
 	CAN_FilterInitStructure.CAN_FilterActivation = ENABLE;//激活过滤器2
 	CAN_FilterInit(&CAN_FilterInitStructure);			//滤波器初始化
 	
+	//设置过滤器3
+	CAN_FilterInitStructure.CAN_FilterNumber = 3;	//过滤器2
+	CAN_FilterInitStructure.CAN_FilterMode = CAN_FilterMode_IdList; 	//屏蔽位模式
+	CAN_FilterInitStructure.CAN_FilterScale = CAN_FilterScale_32bit; 	//32位宽 
+	
+	CAN_FilterInitStructure.CAN_FilterIdHigh = (0x0203)<<5;	//32位ID
+	CAN_FilterInitStructure.CAN_FilterIdLow = CAN_Id_Standard | CAN_RTR_Data;
+
+	CAN_FilterInitStructure.CAN_FilterMaskIdHigh = (0x0204)<<5; //32位MASK
+	CAN_FilterInitStructure.CAN_FilterMaskIdLow = CAN_Id_Standard | CAN_RTR_Data;
+	
+	CAN_FilterInitStructure.CAN_FilterFIFOAssignment = CAN_Filter_FIFO0;//过滤器0关联到FIFO0
+	CAN_FilterInitStructure.CAN_FilterActivation = ENABLE;//激活过滤器2
+	CAN_FilterInit(&CAN_FilterInitStructure);			//滤波器初始化
+	
+	//设置过滤器4
+	CAN_FilterInitStructure.CAN_FilterNumber = 4;	//过滤器2
+	CAN_FilterInitStructure.CAN_FilterMode = CAN_FilterMode_IdList; 	//屏蔽位模式
+	CAN_FilterInitStructure.CAN_FilterScale = CAN_FilterScale_32bit; 	//32位宽 
+	
+	CAN_FilterInitStructure.CAN_FilterIdHigh = (0x0205)<<5;	//32位ID
+	CAN_FilterInitStructure.CAN_FilterIdLow = CAN_Id_Standard | CAN_RTR_Data;
+
+	CAN_FilterInitStructure.CAN_FilterMaskIdHigh = (0x0206)<<5; //32位MASK
+	CAN_FilterInitStructure.CAN_FilterMaskIdLow = CAN_Id_Standard | CAN_RTR_Data;
+	
+	CAN_FilterInitStructure.CAN_FilterFIFOAssignment = CAN_Filter_FIFO0;//过滤器0关联到FIFO0
+	CAN_FilterInitStructure.CAN_FilterActivation = ENABLE;//激活过滤器2
+	CAN_FilterInit(&CAN_FilterInitStructure);			//滤波器初始化
+	
+	
 	CAN_ITConfig(CAN1,CAN_IT_FMP0,ENABLE);				//FIFO0消息挂号中断允许.		    
 
 	NVIC_InitStructure.NVIC_IRQChannel = USB_LP_CAN1_RX0_IRQn;
@@ -139,18 +170,14 @@ u8 CAN1_SendMsg(u8* msg,u8 len,u32 ID)
 
 
 void USB_LP_CAN1_RX0_IRQHandler(void){
-	//extern u16 bID;
-	//extern u16 Recv_Spd, Cur_Spd;
 	CanRxMsg RxMessage;
 	static float Goal_Speed = 0;
   u8 i;
 	CAN_Receive(CAN1, CAN_FIFO0, &RxMessage);
-	//printf("CAN\r\n");
 	
 	switch(RxMessage.StdId)
 	{
-		//printf("CAN\r\n");
-		case 0x201 : {
+		case 0x0201 : {
       for(i=0; i < 8; ++i){
         //储存原始信息
         M3508[0].Original_Data[i] = RxMessage.Data[i];
@@ -158,10 +185,10 @@ void USB_LP_CAN1_RX0_IRQHandler(void){
       //进行消息的转换
       Data_Convert(0);
 			//printf("0x201\r\n");
-			//printf("%d\r\n",M3508[0].Speed);
+			//printf("Speed:%d\r\n",M3508[0].Speed);
       break;
     }
-    case 0x202 : {
+    case 0x0202 : {
       for(i=0; i < 8; ++i){
         //储存原始信息
         M3508[1].Original_Data[i] = RxMessage.Data[i];
@@ -172,39 +199,86 @@ void USB_LP_CAN1_RX0_IRQHandler(void){
 			//printf("0x202");
 			break;
     }
+		case 0x0203 : {
+      for(i=0; i < 8; ++i){
+        //储存原始信息
+        M3508[2].Original_Data[i] = RxMessage.Data[i];
+      }
+      //进行消息的转换
+      Data_Convert(2);
+			//printf("%d\r\n",M3508[2].Speed);
+			//printf("0x202");
+			break;
+    }
+		case 0x0204 : {
+      for(i=0; i < 8; ++i){
+        //储存原始信息
+        M3508[3].Original_Data[i] = RxMessage.Data[i];
+      }
+      //进行消息的转换
+      Data_Convert(3);
+			
+			//printf("0x202");
+			break;
+    }
+		case 0x0205 : {
+      for(i=0; i < 8; ++i){
+        //储存原始信息
+        M3508[4].Original_Data[i] = RxMessage.Data[i];
+      }
+      //进行消息的转换
+      Data_Convert(4);
+			
+			//printf("0x202");
+			break;
+    }
+		case 0x0206 : {
+      for(i=0; i < 8; ++i){
+        //储存原始信息
+        M3508[5].Original_Data[i] = RxMessage.Data[i];
+      }
+      //进行消息的转换
+      Data_Convert(5);
+			
+			//printf("0x202");
+			break;
+    }
     
     // 接受主控消息
     case 0x01e0 >> 5 : {
       Goal_Speed = *((float*)(&RxMessage.Data[0])); //主1
       Goal_Speed *= 1000;
+			//printf("ID1:%d\r\n",(int32_t)Goal_Speed);
 		  M3508[0].PID.Goal_Speed =(int32_t) Goal_Speed;
 			//printf("Goal_Speed: %d\r\n",M3508[0].PID.Goal_Speed);
 			//printf("0x01e0\r\n");
+			
+			Goal_Speed=*((float*)(&RxMessage.Data[4]));//主2
+			Goal_Speed*=1000;
+			M3508[1].PID.Goal_Speed=(int32_t)Goal_Speed;
 			break;
     }
     case 0x02e0 >> 5 : {
-      Goal_Speed = *((float*)(&RxMessage.Data[0])); //主2
-      Goal_Speed *= 20;
-		  M3508[1].PID.Goal_Speed =(int32_t) Goal_Speed;
+      Goal_Speed = *((float*)(&RxMessage.Data[0])); //
+      Goal_Speed *= 1000;
+			//printf("ID3:%d\r\n",(int32_t)Goal_Speed);
+		  M3508[2].PID.Goal_Speed =(int32_t) Goal_Speed;
+
+      Goal_Speed = *((float*)(&RxMessage.Data[4])); //
+      Goal_Speed *= 1000;
+			//printf("ID4:%d\r\n",(int32_t)Goal_Speed);
+		  M3508[3].PID.Goal_Speed =(int32_t) Goal_Speed;
 			break;
     }
     case 0x03e0 >> 5 : {
       Goal_Speed = *((float*)(&RxMessage.Data[0])); //
-      Goal_Speed *= 20;
-		  M3508[2].PID.Goal_Speed =(int32_t) Goal_Speed;
-
-      Goal_Speed = *((float*)(&RxMessage.Data[4])); //
-      Goal_Speed *= 20;
-		  M3508[3].PID.Goal_Speed =(int32_t) Goal_Speed;
-			break;
-    }
-    case 0x04e0 >> 5 : {
-      Goal_Speed = *((float*)(&RxMessage.Data[0])); //
-      Goal_Speed *= 20;
+      Goal_Speed *= 1000;
+			//printf("ID5:%d\r\n",(int32_t)Goal_Speed);
 		  M3508[4].PID.Goal_Speed =(int32_t) Goal_Speed;
 
       Goal_Speed = *((float*)(&RxMessage.Data[4])); //
-      Goal_Speed *= 20;
+      Goal_Speed *= 1000;
+			//printf("ID6:%d\r\n",(int32_t)Goal_Speed);
 		  M3508[5].PID.Goal_Speed =(int32_t) Goal_Speed;
 			break;
     }

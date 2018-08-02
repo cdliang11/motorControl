@@ -26,7 +26,6 @@ void get_pot_adc()
 			v[i]=(float)(adc[i])*(3.3/4096);
 			adc[i]=v[i];
 		}
-		
 }
 
 

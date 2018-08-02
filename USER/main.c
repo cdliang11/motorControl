@@ -23,7 +23,7 @@ void PID_Write(void)
 
  int main(void)
  {	
-	u8 i;
+//	u8 i;
   NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);	 //设置NVIC中断分组2:2位抢占优先级，2位响应优先级
 	delay_init();
 	uart_init(115200);
@@ -31,15 +31,15 @@ void PID_Write(void)
 	LED_Init();
 	
 	//PID_Write();
-	
-	for(i = 0; i < 4; ++i){
-		delay_ms(1000);
-	}
+//	
+//	for(i = 0; i < 2; ++i){
+//		delay_ms(1000);
+//	}
 	// 15MS
 	// 这里需要优化
 	CAN1_Init(CAN_SJW_1tq, CAN_BS2_8tq, CAN_BS1_9tq, 2);
 	Control_Initialize();//电机结构体初始化
-	TIM3_Int_Init(150-1, 7200-1); // 15ms中断一次
+	TIM3_Int_Init(15, 36000-1); // 8ms中断一次
 	//printf("start\r\n");
 	while(1){
 		//printf("ok\r\n");
@@ -49,3 +49,6 @@ void PID_Write(void)
 	}
 	
  }
+
+
+

@@ -50,7 +50,10 @@ void TIM3_IRQHandler(void)   //TIM3中断
 {
 	if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)  //检查TIM3更新中断发生与否
 		{
+			static u8 i=0;
       TIM_ClearITPendingBit(TIM3, TIM_IT_Update  );  //清除TIMx更新中断标志 
+			
+			//电位器的限位
 //			get_pot_adc();
 //			adc_angle_transform();
 //			
@@ -69,6 +72,15 @@ void TIM3_IRQHandler(void)   //TIM3中断
 			//printf("M2_Goal_Speed:%d\r\n",M3508[1].PID.Goal_Speed);
 			
 			CAN_Send_Control_Value();
+			printf("%d,%d,%d,%d\n",M3508[0].PID.Goal_Speed,M3508[0].Speed,M3508[1].PID.Goal_Speed,M3508[1].Speed);
+//			if(i>9) 
+//			{
+//				printf("M1_Speed:%d\r\n",M3508[0].Speed);
+//				printf("M1_Goal_Speed:%d\r\n",M3508[0].PID.Goal_Speed);
+//				i=0;
+//			}
+//			else i++;
+			//Motor_Info_Send();
 			
 //		send_can_data(angle[0],angle[1],(0x11e0>>5));
 //		delay_ms(10);  //以前：3   现在：10    必须加延时，CAN通信才稳定
